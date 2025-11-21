@@ -1,43 +1,68 @@
-# Chirpy Starter
+# My Technical Blog
 
-[![Gem Version](https://img.shields.io/gem/v/jekyll-theme-chirpy)][gem]&nbsp;
-[![GitHub license](https://img.shields.io/github/license/cotes2020/chirpy-starter.svg?color=blue)][mit]
+A personal technical blog built with Jekyll and the Chirpy theme, hosted on GitHub Pages.
 
-When installing the [**Chirpy**][chirpy] theme through [RubyGems.org][gem], Jekyll can only read files in the folders
-`_data`, `_layouts`, `_includes`, `_sass` and `assets`, as well as a small part of options of the `_config.yml` file
-from the theme's gem. If you have ever installed this theme gem, you can use the command
-`bundle info --path jekyll-theme-chirpy` to locate these files.
+## About
 
-The Jekyll team claims that this is to leave the ball in the user’s court, but this also results in users not being
-able to enjoy the out-of-the-box experience when using feature-rich themes.
+This blog shares insights on software development, programming, and technology. Topics covered include:
 
-To fully use all the features of **Chirpy**, you need to copy the other critical files from the theme's gem to your
-Jekyll site. The following is a list of targets:
+- Web Development
+- Programming Languages (Python, JavaScript, etc.)
+- Version Control (Git)
+- DevOps & Best Practices
+- And more!
 
-```shell
-.
-├── _config.yml
-├── _plugins
-├── _tabs
-└── index.html
+## Live Site
+
+Visit the blog at: [https://myx0506.github.io](https://myx0506.github.io)
+
+## Local Development
+
+To run this blog locally:
+
+1. Install Ruby and Bundler
+2. Clone this repository
+3. Install dependencies:
+   ```bash
+   bundle install
+   ```
+4. Run the development server:
+   ```bash
+   bundle exec jekyll serve
+   ```
+5. Open your browser to `http://localhost:4000`
+
+## Writing Posts
+
+Create new posts in the `_posts` directory following this naming convention:
+```
+YYYY-MM-DD-title-of-post.md
 ```
 
-To save you time, and also in case you lose some files while copying, we extract those files/configurations of the
-latest version of the **Chirpy** theme and the [CD][CD] workflow to here, so that you can start writing in minutes.
+Each post should have front matter at the top:
+```yaml
+---
+title: Your Post Title
+date: YYYY-MM-DD HH:MM:SS -0500
+categories: [Category1, Category2]
+tags: [tag1, tag2, tag3]
+---
+```
 
-## Usage
+## Customization
 
-Check out the [theme's docs](https://github.com/cotes2020/jekyll-theme-chirpy/wiki).
+- Edit `_config.yml` to update site settings
+- Modify `_tabs/about.md` to update the About page
+- Add your own avatar image and update the `avatar` field in `_config.yml`
 
-## Contributing
+## Deployment
 
-This repository is automatically updated with new releases from the theme repository. If you encounter any issues or want to contribute to its improvement, please visit the [theme repository][chirpy] to provide feedback.
+This site automatically deploys to GitHub Pages when changes are pushed to the `main` or `master` branch.
+
+## Theme
+
+This blog uses the [Chirpy](https://github.com/cotes2020/jekyll-theme-chirpy) theme, a minimal, responsive, and feature-rich Jekyll theme for technical writing.
 
 ## License
 
-This work is published under [MIT][mit] License.
-
-[gem]: https://rubygems.org/gems/jekyll-theme-chirpy
-[chirpy]: https://github.com/cotes2020/jekyll-theme-chirpy/
-[CD]: https://en.wikipedia.org/wiki/Continuous_deployment
-[mit]: https://github.com/cotes2020/chirpy-starter/blob/master/LICENSE
+This work is published under [MIT](LICENSE) License.
