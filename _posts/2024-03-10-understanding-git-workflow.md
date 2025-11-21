@@ -180,3 +180,4 @@ A good Git workflow improves team productivity and code quality. Choose a workfl
 - [Git Documentation](https://git-scm.com/doc)
 - [Atlassian Git Tutorials](https://www.atlassian.com/git/tutorials)
 - [GitHub Flow Guide](https://guides.github.com/introduction/flow/)
+
