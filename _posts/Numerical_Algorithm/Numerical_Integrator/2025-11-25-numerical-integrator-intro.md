@@ -2,19 +2,19 @@
 layout: post
 title: 数值积分器（序）
 author: myx
-category:
+categories:
 - 数值算法
 - 数值积分器
 math: true
 date: 2025-11-25 18:30 +0800
 ---
 <!-- 数值积分器介绍 -->
-## 简介
+## **简介**
 <div class="header">
 由于大多数复杂系统（包括动力系统）不存在简单封闭形式解析解，因此<strong>数值积分器</strong> （Numerical Integrators）一直是求解描述系统常微分方程（组）<strong>ODEs</strong> (Ordinary Differential Functions)有初值问题（Initial Value Problems，IVPs）最为行至有效的方式。
 </div>
 
-### 公式记法和数值本质
+### **公式记法和数值本质**
 对于常见一阶ODEs系统：
 
 $$\begin{equation}
@@ -34,7 +34,7 @@ $$\begin{equation}
 \end{equation}$$
 从小参数动力系统求解的角度看，数值积分器本质上也是对于真实解的有限介绍截断近似，而构造解是基于通用数值分析方法，所以适用于各种问题。无论是基于积分节点构造有限阶数多项式积分近似、等间距有限阶数牛顿差分构造、哈密顿系统辛算法构造近似相流，都会由于有限阶数截断导致LTE产生，当然后期发展出保辛/时间对称的几何特征积分器（Geometry Numerical Integrators）可以有效抑制LTE的长期累积，不过均有各自所适用或者表现更好的场景。对于问题是否刚性也需要选择合适积分器处理不同时间尺度变化率的问题。因此，正如REBOUND[^rebound]的主要开发者Rein[^rein]曾经说过：“并不存在可以解决所有问题完美的数值积分器，更重要的是根据不同问题特性选择最合适的数值积分器”。
 
-## 积分器分类
+## **积分器分类**
 <div class="content-box">
 数值积分器是一个庞大的算法家族，因此针对不同性质的ODEs系统前人研究中开发了通用性/针对性的数值架构。在分类学（Taxonomy）上想要对数值积分器进行细化分类也是较为复杂的工作。这里对于积分器自身算法性质进行一些罗列。
 </div>
@@ -49,7 +49,7 @@ $$\begin{equation}
 </ul>
 </div>
 
-## 主要积分方法罗列
+## **主要积分方法罗列**
 
 | Scheme | Symplectic | Time-Symmetric | Force Evaluations | Variable-Step | ODEs Order |
 |:-----|:----:|:----:|:----:|:----:|:----:|
@@ -105,88 +105,4 @@ $$\begin{equation}
 [^TRACE]: [TRACE 文章](https://ui.adsabs.harvard.edu/abs/2024MNRAS.533.3708L/abstract)
 
 
-<style>
-/* 博客简介页面特殊样式 */
-.header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 15px;
-  border-radius: 10px;
-  margin: 20px 0;
-  font-size: 1.1em;
-  line-height: 1.6;
-  text-align: left;
-}
-
-.header strong {
-  color: #2c3e50;
-  background-color: #ebe189ff;
-  padding: 1px 2px;
-  border-radius: 3px;
-  font-weight: 600;
-}
-
-.list-box {
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  border-left: 5px solid #667eea;
-  margin: 25px 0;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.list-box ul {
-  margin: 0;
-  padding-left: 10px;
-}
-
-.list-box ol {
-  margin: 0;
-  padding-left: 10px;
-}
-
-.list-box li {
-  margin-bottom: 10px;
-  line-height: 1.6;
-}
-
-.list-box strong {
-  color: #2c3e50;
-  background-color: #e3f2fd;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-weight: 600;
-}
-
-/* 通用样式，可在所有文章中使用 */
-.content-box {
-  background-color: #fff;
-  border: 1px solid #e1e4e8;
-  border-radius: 6px;
-  padding: 20px;
-  margin: 20px 0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.note-box {
-  background-color: #fff8e1;
-  border-left: 4px solid #ffc107;
-  padding: 15px;
-  margin: 15px 0;
-  border-radius: 4px;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .list-box {
-    padding: 15px;
-    margin: 15px 0;
-  }
-  
-  .header {
-    padding: 15px;
-    margin: 15px 0;
-    font-size: 1em;
-  }
-}
-</style>
+<link rel="stylesheet" href="{{ '/assets/css/mystyle.css' | relative_url }}">

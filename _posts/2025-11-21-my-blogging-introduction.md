@@ -6,12 +6,12 @@ author: myx
 pin: true
 pin-order: 1
 ---
-## 简介
+## **简介**
 <div class="header">
 笔者专业为天体力学轨道动力学和太阳系小天体演化动力学，于南京大学天文与空间科学学院直博五年级就读时创建该博客，目前处于博士毕业筹备阶段。
 </div>
 
-## 博客契机
+## **博客契机**
 <div class="content-box">
 连续的论文撰写和小修压的喘不过气来。鉴于笔者业余时间想要进行一些乱七八糟的学习，属于心里想要样样通实际上手样样松，包括但不限于<strong>专业方向（轨道动力学）</strong>、<strong>数值算法</strong>、<strong>算法和数据结构</strong>、<strong>语言</strong>、<strong>不同工具环境配置</strong>等；加之本地无论docx还是markdown笔记管理混乱，利用静态网点博客的形式可能助于各种知识点梳理以及文献整理。<br><br>
 因此本博客主要目的有以下：
@@ -33,75 +33,4 @@ pin-order: 1
 </div>
 
 
-<style>
-/* 博客简介页面特殊样式 */
-.header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 15px;
-  border-radius: 10px;
-  margin: 20px 0;
-  font-size: 1.1em;
-  line-height: 1.6;
-  text-align: left;
-}
-
-.list-box {
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  border-left: 5px solid #667eea;
-  margin: 25px 0;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.list-box ol {
-  margin: 0;
-  padding-left: 10px;
-}
-
-.list-box li {
-  margin-bottom: 10px;
-  line-height: 1.6;
-}
-
-.list-box strong {
-  color: #2c3e50;
-  background-color: #e3f2fd;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-weight: 600;
-}
-
-/* 通用样式，可在所有文章中使用 */
-.content-box {
-  background-color: #fff;
-  border: 1px solid #e1e4e8;
-  border-radius: 6px;
-  padding: 20px;
-  margin: 20px 0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.note-box {
-  background-color: #fff8e1;
-  border-left: 4px solid #ffc107;
-  padding: 15px;
-  margin: 15px 0;
-  border-radius: 4px;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .list-box {
-    padding: 15px;
-    margin: 15px 0;
-  }
-  
-  .header {
-    padding: 15px;
-    margin: 15px 0;
-    font-size: 1em;
-  }
-}
-</style>
+<link rel="stylesheet" href="{{ '/assets/css/mystyle.css' | relative_url }}">

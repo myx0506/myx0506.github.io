@@ -3,6 +3,17 @@
 icon: fas fa-info-circle
 order: 4
 ---
+正如笔者关于该Blog的签名中写到，本博客用于个人有关技术型笔记到整理和记录以及可能的公共分享，静态网点的方式可以帮助个人进行本地笔记整理、更新和保存。笔者是南京大学天文与空间科学学院的本博生(2017.9.1-2026.6.-)，研究专业是轨道力学和太阳系小天体动力学，着重想要学习记录有关专业相关的基础数值方法和轨道相关算法。对于代码语言、数据结构、算法的学习也是本博客目前想要分享的重点。
 
-> Add Markdown syntax content to file `_tabs/about.md`{: .filepath } and it will show up on this page.
-{: .prompt-tip }
+目前个人开发语言主要集中在FORTRAN、C++，辅之以Python进行一些简单的数据分析和可视化。强化学习一些工作流（如Linux、MacOS系统、项目编译管理工具Make、CMake、Git、HTML/CSS/JS前端等）也是笔者的一大目的。
+
+除此以外也会利用静态网点管理一些文献阅读的笔记，方便后续个人查询翻阅。
+
+## **📞 联系方式**
+
+> - 📧 **邮箱**: [myx990108@163.com](mailto:myx990108@163.com)
+> - 💬 **微信**: myx861642206
+> - ☎️ **电话**: 18051987609
+{: .prompt-info }
+
+<link rel="stylesheet" href="{{ '/assets/css/mystyle.css' | relative_url }}">
