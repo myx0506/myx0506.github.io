@@ -129,12 +129,13 @@ $$\begin{equation}
       hD&=\ln{(\Delta+I)}=\Delta-\frac{\Delta^{2}}{2}+\frac{\Delta^{3}}{3}+\cdots \\
       D&=\frac{1}{h}\left(\Delta-\frac{\Delta^{2}}{2}+\frac{\Delta^{3}}{3}+\cdots \right)
     \end{aligned}
+    \label{Eq.14}
   \end{equation}$$
 不难看出这和\eqref{Eq.12}给出的形式完全一致。
 
 至此，我们从**多项式插值**和**算符推导**理解了**前向差分**形式下如何推导函数任意阶精度到间隔$h$任意阶次的微分形式。除了上述两个角度，也可以从\eqref{Eq.Taylor Expansion}在不同节点展开联立方程组待定系数的方式看待数值微分问题。如果我们用$n+1$个节点来构造$f'(x_{0})$，那么有以下形式：
   $$\begin{equation}
-    f'(x_{0})=\sum_{i=0}^{n}\alpha_{i}f_{i}
+    f'(x_{0})=\frac{1}{h}\sum_{i=0}^{n}\alpha_{i}f_{i}
   \end{equation}$$
 当$n=1$时，可以有方程组：
   $$\begin{equation}
@@ -157,6 +158,20 @@ $$\begin{equation}
   \end{equation}$$
 我们同样可以得到$f'(x_{0})$的三点前向差分公式。利用$n+1$个点，最多可以求解$n+1$个独立方程，自然可以将数值微分的近似精度提高到$\mathcal{O}(h^{n})$。
 
+当$n=k$时，可以有方程组：
+  $$\begin{equation}
+  \left\{
+  \begin{aligned}
+    \sum_{i=0}^{k}i^{0}\alpha_{i}&=0 \\
+    \sum_{i=0}^{k}i^{1}\alpha_{i}&=1 \\ 
+    \sum_{i=0}^{k}i^{2}\alpha_{i}&=0 \\ 
+    &\vdots \\
+    \sum_{i=0}^{k}i^{k}\alpha_{i}&=0
+  \end{aligned}
+  \right.
+  \label{Eq.18}
+  \end{equation}$$
+
 这里的三个思想：
 > - 利用$n+1$个点进行$n$阶多项式构造
 > - 算符推导
@@ -168,8 +183,88 @@ $$\begin{equation}
 {:.prompt-info}
 
 - #### **后向差分**
-  后向差分和前向差分本质完全一致，只需要将$(0,\cdots,k)$的对应index起点放到$k$即可，仅存在表示形式的差别。
+后向差分和前向差分本质完全一致，只需要将$(0,\cdots,k)$的对应index起点放到$k$即可，仅存在表示形式的差别。同时，由于后向差分的往期信息依赖特性，其也是**Adams-Bashforth**为首的**多步法积分器**的重要基础。
 
 - #### **中间差分**
+顾名思义，中间差分的基本数值格式依赖与$x=x_{0}$想对称的前后$m$个节点信息。对于函数$f(x)$而言，其位于$x=x_{0}$处任意阶微分的基本中间差分形式为：
+  $$\begin{equation}
+  \begin{aligned}
+    f'(x_{0})&\approx\frac{f(x_{0}+\frac{h}{2})-f(x_{0}-\frac{h}{2})}{h}+\mathcal{O}(h^{2}) \\
+             &\approx\frac{f(x_{0}+h)-f(x_{0}-h)}{2h}+\mathcal{O}(h^{2}) \\
+    f''(x_{0})&\approx\frac{f'(x_{0}+\frac{h}{2})-f'(x_{0}-\frac{h}{2})}{h} \\
+              &\approx\frac{\frac{f(x_{0}+h)-f(x_{0})}{h}-\frac{f(x_{0})-f(x_{0}-h)}{h}}{h} \\
+              &\approx\frac{f(x_{0}+h)-2f(x_{0})+f(x_{0}-h)}{h^{2}} \\
+              &=\frac{f(x_{0}+h)-2f(x_{0})+f(x_{0}-h)}{h^{2}}+\mathcal{O}(h^{2}) \\
+    \vdots & \\
+    f^{(n)}(x_{0})&\approx\frac{\delta^{n}f(x_{0})}{h^{n}} \\
+                  &\approx\frac{\sum_{k=0}^{n}(-1)^{k}\binom{n}{k}f\left(x_{0}+(\frac{n}{2}-k)h\right)}{h^{n}} \\
+                  &=\frac{\sum_{k=0}^{n}(-1)^{k}\binom{n}{k}f\left(x_{0}+(\frac{n}{2}-k)h\right)}{h^{n}}+\mathcal{O}(h^{2})
+  \end{aligned}
+  \label{Eq.Central_Difference}
+  \end{equation}$$
+由于其节点相关$x=x_{0}$的对称特性，从\eqref{Eq.Taylor Expansion}中泰勒级数展开的角度出发，可以看到偶数项由于线性组合消除，因此$n$阶微分的精度自然达到了$\mathcal{O}(h^{2})$，比前向/后向差分更高。同样，\eqref{Eq.Central_Difference}中的中间差分算子$\delta^{n}$有类似前向差分算子的二项式系数特征：
+  $$\begin{equation}
+  \begin{aligned}
+    \delta^{n}f_{0}&=\left(E^{\frac{1}{2}}-E^{-\frac{1}{2}}\right)^{n}f_{0} \\
+    &=\sum_{k=0}^{n}(-1)^{k}\binom{n}{k}E^{\frac{n-2k}{2}}f_{0} \\
+    &=\sum_{k=0}^{n}(-1)^{k}\binom{n}{k}f\left(x_{0}+(\frac{n}{2}-k)h\right)
+  \end{aligned}
+  \end{equation}$$
+类似在**前向差分**部分的推导，我们可以利用添加信息点的方式来构造高阶多项式逼近任意阶微分的任意阶次精度形式（这里中间差分的Newton插值多项式并不直观，或者如\eqref{Eq.14}利用微分算符关系进行递推。同样以一阶微分为例，存在中间差分格式和微分算符关系：
+  $$\begin{equation}
+    \delta=e^{\frac{h}{2}D}-e^{-\frac{h}{2}D}=2\sinh{\frac{h}{2}D}
+  \end{equation}$$
+那么一阶微分形式的算子表达为：
+  $$\begin{equation}
+    hD=2\sinh^{-1}{\frac{\delta}{2}}=\delta-\frac{1}{24}\delta^{3}+\frac{3}{640}\delta^{5}+\cdots \label{Eq.22}
+  \end{equation}$$
+注意到，这里的中间差分算符$\delta=f(x_{0}+\frac{h}{2})-f(x_{0}-\frac{h}{2})$是半点格式，我们可以改写整点的基本中间差分算符：$\delta'=f(x_{0}+h)-f(x_{0}-h)$，此时\eqref{Eq.22}变成：
+  $$\begin{equation}
+    hD=\sinh^{-1}{\frac{\delta'}{2}}=\frac{\delta'}{2}-\frac{1}{48}\delta'^{3}+\frac{3}{1280}\delta'^{5}+\cdots \label{Eq.23}
+  \end{equation}$$
+
+> 将当前$x=x_{0}$和前后$m$个对称点总共$n=2m+1$个点看成多项式插值节点<br>
+> **$m=1$**: $$f'(x_{0})\approx \frac{\delta'}{2h}\approx \frac{f_{1}-f_{-1}}{2h}+\mathcal{O}(h^{2})$$ <br>
+> **$m=2$**: $$f'(x_{0})\approx \frac{1}{h}\left(\frac{\delta'}{2}-\frac{\delta^{3}}{48}\right)\approx \frac{-f_{3}+27f_{1}-27f_{-1}+f_{3}}{48h}+\mathcal{O}(h^{4})$$
+{:.prompt-info}
+
+> 注意到，当$m=2$时，由微分算符推导的$f(x)$一阶微分的五点四阶精度公式并不是标准中心差分公式：
+> $$f'(x_{0})\approx \frac{-f_{2}+8f_{1}-8f_{-1}+f_{-2}}{12h}+\mathcal{O}(h^{4})$$
+{:.prompt-warning}
+
+这个问题我们可以从联立多项式待定系数求解角度出发，基于中间差分的对称性，线性方程组的形式可以写成：
+  $$\begin{equation}
+    f'(x)\approx\frac{1}{h}\sum_{k=-m}^{m}\alpha_{k}f(x+kh) \label{Eq.24}
+  \end{equation}$$
+其中，对于一阶微分，上述方程组系数满足性质:
+ - $\alpha_{-k}=-\alpha_{k}$
+ - $\sum_{k=-m}^{m}\alpha_{k}=0$
+ - $\sum_{k=-m}^{m}k\alpha_{k}=1$
+
+
+此时我们可以利用性质对\eqref{Eq.24}进行改写并且代入泰勒级数进行展开：
+  $$\begin{equation}
+  \begin{aligned}
+    f'(x)&\approx\frac{1}{h}\sum_{k=0}^{m}\alpha_{k}\left[f(x+kh)-f(x-kh)\right] \\
+    &\approx2\sum_{n odd}\frac{h^{n-1}}{n!}f^{(n)}(x)\left(\sum_{k=1}^{m}\alpha_{k}k^{n}\right)
+  \end{aligned}
+  \label{Eq.25}
+  \end{equation}$$
+对于需要达到的$\mathcal{O}(h^{2m})$阶精度，只要对应$m$个独立线性方程组满足要求：
+  $$\begin{equation}
+  \left\{
+  \begin{aligned}
+    \sum_{k=1}^{m}2k\alpha_{k}&=1 \\
+    \sum_{k=1}^{m}k^{3}\alpha_{k}&=0 \\ 
+    \sum_{k=1}^{m}k^{5}\alpha_{k}&=0 \\ 
+    &\vdots \\
+    \sum_{k=1}^{m}k^{2m-1}\alpha_{k}&=0 \\ 
+  \end{aligned}
+  \right.
+  \label{Eq.26}
+  \end{equation}$$
+可以看到**微分算符**和**联立方程**得到的高阶公式表达不同本质原因是**中间算符形式选取不同，不同的节点分布密度会导致高阶泰勒项系数不同，一般而言节点分布越密集，带来的局部误差常数越小**，这也符合我们一般的直觉认知（越近的信息越能准确反映局部变率信息）。
+
+- #### **Richardson外推**
 
 <link rel="stylesheet" href="{{ '/assets/css/mystyle.css' | relative_url }}">
