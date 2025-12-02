@@ -334,7 +334,6 @@ Neville算法通用递推公式可以写成：
 此时$r=(h_{i-j}/h_{i})^{p}$，形式和Richardson外推方法完全一致！
 
 > **Neville算法不仅可以进行多项式递推，也可以进行有理函数形式的递推**
-> $$$$
 {:.prompt-tip}
 
 <link rel="stylesheet" href="{{ '/assets/css/mystyle.css' | relative_url }}">
