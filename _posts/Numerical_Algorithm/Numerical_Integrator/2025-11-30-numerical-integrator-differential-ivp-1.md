@@ -756,9 +756,4 @@ end subroutine RichardsonCentralDiff
 
 尽管微分求解的基本单元是二阶标准中间差分方法，在利用四个步长的基础上仍然可以很快收敛到精确解。
 
-### **定积分问题**
-<div class="content-box">
-</div>
-
-
 <link rel="stylesheet" href="{{ '/assets/css/mystyle.css' | relative_url }}">
