@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 数值积分器：数值微分、定积分和IVP的关系
+title: 数值积分器：数值微分、定积分和IVP的关系（一）
 author: myx
 categories:
 - 数值算法
