@@ -334,6 +334,431 @@ Neville算法通用递推公式可以写成：
 此时$r=(h_{i-j}/h_{i})^{p}$，形式和Richardson外推方法完全一致！
 
 > **Neville算法不仅可以进行多项式递推，也可以进行有理函数形式的递推**
+> $$R_{i,j}(x)=R_{i,j-1}(x)+\frac{R_{i,j-1}(x)-R_{i-1,j-1}(x)}{\left(\frac{x-x_{i-j}}{x-x_{j}}\right)\left[1-\frac{R_{i,j-1}(x)-R_{i-1,j-1}(x)}{R_{i,j-1}(x)-R_{i-1,j-2}(x)}\right]-1}$$
 {:.prompt-tip}
+
+### **数值微分的一些算例**
+- #### **前/后向差分和中间差分计算给定函数的n阶微分**
+
+关于前/后向差分和中间差分计算给定函数$n$阶微分使用并不多。原因有二，一是不会直观对于高阶微分用一阶量进行差分；二是受限于精度问题，即便采用$p+1$个节点进行$p$阶多项式近似，得到的$n=p$阶微分只能达到$\mathcal{O}(h)$，并且算法本身并不足够稳定。这里仅仅展示该算例方法的Fortran代码实现和特定结果。
+对于前/后向差分，根据\eqref{Eq.Forward_Difference}形式，很容易给出形如：
+$$\begin{equation}
+  f^{(n)}(x_{0})=\frac{1}{h^{n}}\sum_{j=0}^{n}c_{n}(j)f(x_{0}+jh)
+  \label{Eq.33}
+\end{equation}$$
+的计算机实现形式，其中：
+$$\begin{equation}
+  c_{n}(j) = (-1)^{n-j}\binom{n}{j} 
+  \label{Eq.34}
+\end{equation}$$
+
+这里给一个前向差分计算$n$阶微分的Fortran语言实现（接口不固定，可以根据需求修改）：
+```
+! > *****************************************************************
+! > subroutine ForwardDiffNCoef(iorder, coef)
+! > *****************************************************************
+! > Computes the coefficients for the forward difference formula to
+! > approximate the n-th order derivative.
+! > y^{(n)}(x) = (1/h^{n}) * sum_{j=0}^{n} coef(j) * y(x + j*h)
+! > coef(j) = sum_{k=0}^{j} (-1)^{j-k} * C(n, k)
+! > *****************************************************************
+! > Inputs:
+! >   iorder - order of the derivative
+! > Outputs:
+! >   coef(iorder+1) - array of computed coefficients
+! > *****************************************************************
+subroutine ForwardDiffNCoef(iorder, coef)
+  implicit none
+  ! ...Input params...
+  integer, intent(in) :: iorder
+  ! ...Output params...
+  real*8, intent(out) :: coef(iorder+1)
+  ! ...Local variables...
+  integer :: j
+  real*8, external :: Binom
+  ! ...Execution...
+  coef = 0D0
+  do j = 1, iorder + 1
+    coef(j) = (-1.0d0)**(iorder - j + 1) * Binom(iorder, j - 1)
+  end do
+end subroutine ForwardDiffNCoef
+
+! > *****************************************************************
+! > subroutine ForwardDiffN(iorder, h, f_xh, x, df)
+! > *****************************************************************
+! > Computes the numerical n-th order derivative of a function using 
+! > forward differences (1st order accurate).
+! > Inputs:
+! >   func   - external function to differentiate
+! >   iorder - order of the derivative
+! >   h      - step size for finite difference
+! >   x      - point at which to evaluate the derivative
+! > Outputs:
+! >   df     - computed derivative value
+! > *****************************************************************
+subroutine ForwardDiffN(iorder, h, f_xh, x, df)
+  implicit none
+  ! ...Input params...
+  integer, intent(in) :: iorder
+  real*8, intent(in) :: h
+  real*8, intent(in) :: f_xh(iorder+1), x
+  ! ...Output params...
+  real*8, intent(out) :: df
+  ! ...Local variables...
+  integer :: j
+  real*8 :: coef(iorder+1)
+  ! ...Execution...
+  ! Compute ForwardDiffCoeficients
+  call ForwardDiffNCoef(iorder, coef)
+  ! Compute the iorder-th derivative using forward difference formula
+  df = 0.D0
+  do j = 1, iorder + 1
+    df = df + coef(j) * f_xh(j)
+  end do
+  df = df / h**dble(iorder)
+end subroutine ForwardDiffN
+```
+{: file="ForwardDiffN.f90"}
+
+对于给定多项数函数$$y=e^{x}$$，我们计算到函数在$x_{0}=0$处的4阶微分（步长$h=0.01$）：
+
+|  $x_{0}=0$  | 准确值 | 估算值 | 差值绝对值 |
+|:--------:|:--------:|:--------:|:--------:|
+| $y$     | 1 |  |  |
+| $y'$    | 1 | 1.0050167084167949 | 5.0167084167949128E-003 |
+| $y''$   | 1 | 1.0100585841987808 | 1.0058584198780807E-002 |
+| $y'''$  | 1 | 1.0151257534563027 | 1.5125753456302737E-002 |
+| $y''''$ | 1 | 1.0202183320373592 | 2.0218332037359232E-002 |
+
+类似地，对于中间差分格式，为了使得点更加密集，这里仍采用\eqref{Eq.Central_Difference}的半点算符进行算例实现。有关$c_{n}(j)$格式和\eqref{Eq.34}完全一致，只是离散节点的获取需要与半点节点对应。
+```
+! > *****************************************************************
+! > subroutine CentralDiffN(iorder, h, f_xh, x, df)
+! > *****************************************************************
+! > Computes the numerical n-th order derivative of a function using 
+! > central differences (2nd order accurate).
+! > Inputs:
+! >   func   - external function to differentiate
+! >   iorder - order of the derivative
+! >   h      - step size for finite difference
+! >   x      - point at which to evaluate the derivative
+! > Outputs:
+! >   df     - computed derivative value
+! > *****************************************************************
+subroutine CentralDiffN(iorder, h, f_xh, x, df)
+  implicit none
+  ! ...Input params...
+  integer, intent(in) :: iorder
+  real*8, intent(in) :: h
+  real*8, intent(in) :: f_xh(iorder+1), x
+  ! ...Output params...
+  real*8, intent(out) :: df
+  ! ...Local variables...
+  integer :: j
+  real*8 :: coef(iorder+1)
+  ! ...Execution...
+  ! Compute ForwardDiffCoeficients
+  call CentralDiffNCoef(iorder, coef)
+  ! Compute the iorder-th derivative using forward difference formula
+  df = 0.D0
+  do j = 1, iorder + 1
+    df = df + coef(j) * f_xh(j)
+  end do
+  df = df / h**dble(iorder)
+end subroutine CentralDiffN
+
+! > *****************************************************************
+! > subroutine CentralDiffNCoef(iorder, coef)
+! > *****************************************************************
+! > Computes the coefficients for the forward difference formula to
+! > approximate the n-th order derivative.
+! > y^{(n)}(x) = (1/h^{n}) * sum_{j=0}^{n} coef(j) * y(x + j*h)
+! > coef(j) = sum_{k=0}^{j} (-1)^{j-k} * C(n, k)
+! > *****************************************************************
+! > Inputs:
+! >   iorder - order of the derivative
+! > Outputs:
+! >   coef(iorder+1) - array of computed coefficients
+! > *****************************************************************
+subroutine CentralDiffNCoef(iorder, coef)
+  implicit none
+  ! ...Input params...
+  integer, intent(in) :: iorder
+  ! ...Output params...
+  real*8, intent(out) :: coef(iorder+1)
+  ! ...Local variables...
+  integer :: j
+  real*8, external :: Binom
+  ! ...Execution...
+  coef = 0D0
+  do j = 1, iorder + 1
+    coef(j) = (-1.0d0)**(iorder - j + 1) * Binom(iorder, j - 1)
+  end do
+end subroutine CentralDiffNCoef
+```
+{: file="CentralDiffN.f90"}
+
+对于给定多项数函数$$y=e^{x}$$，我们计算到函数在$x_{0}=0$处的4阶微分（步长$h=0.01$）：
+
+|  $x_{0}=0$  | 准确值 | 估算值 | 差值绝对值 |
+|:--------:|:--------:|:--------:|:--------:|
+| $y$     | 1 |  |  |
+| $y'$    | 1 | 1.0000041666718640 | 4.1666718639810085E-006 |
+| $y''$   | 1 | 1.0000083333605581 | 8.3333605580548920E-006 |
+| $y'''$  | 1 | 1.0000124999187674 | 1.2499918767394647E-005 |
+| $y''''$ | 1 | 1.0000166916768194 | 1.6691676819391432E-005 |
+
+> 很显然，中间差分计算$n$阶导数的2阶精度相比前向/后向差分的1阶精度数值提升较大。
+{:.prompt-info}
+
+- #### **前/后向差分和中间差分计算给定函数的一阶微分的n阶精度**
+
+在数值分析中，更加常用的是利用函数解析形式的离散节点信息对于特定$x=x_{0}$一阶微分进行近似。并且如前所述，**信息点越多、越密集**，**一阶导数信息求解越精确**。这里我们仍然先对前/后向差分计算形如\eqref{Eq.33}的线性求和形式，根据$p$阶精度和$p+1$阶精度的关系(\eqref{Eq.12})，可以得到很简单的$c_{p}(j)$递推关系：
+$$\begin{equation}
+\begin{aligned}
+  &c_{1}(0) = -1,\quad c_{1}(1) = 1 \\
+  &c_{p+1}(j)=c_{p}(j) + \frac{(-1)^{j-1}\binom{p}{j}}{p}\quad j=0,\cdots,p
+\end{aligned}
+\end{equation}$$
+
+代码实现如下：
+```
+! > *****************************************************************
+! > subroutine ForwardDiff(iorder, h, f_xh, x, df)
+! > *****************************************************************
+! > Computes the numerical derivative of a function using forward differences.
+! > Inputs:
+! >   iorder - order of the derivative
+! >   h      - step size for finite difference
+! >   f_xh(iorder+1) - function values at x + j*h for j = 0 to iorder
+! >   x      - point at which to evaluate the derivative
+! > Outputs:
+! >   df     - computed derivative value
+! > *****************************************************************
+subroutine ForwardDiff(iorder, h, f_xh, x, df)
+  implicit none
+  ! ...Input params...
+  integer, intent(in) :: iorder
+  real*8, intent(in) :: h
+  real*8, intent(in) :: x, f_xh(iorder+1)
+  ! ...Output params...
+  real*8, intent(out) :: df
+  ! ...Local variables...
+  integer :: j
+  real*8 :: coef(iorder+1)
+  ! ...Execution...
+  ! Compute ForwardDiffCoeficients
+  call ForwardDiffCoef(iorder, coef)
+  ! Compute the iorder-th derivative using forward difference formula
+  df = 0.D0
+  do j = 1, iorder + 1
+    df = df + coef(j) * f_xh(j) / h
+  end do
+end subroutine ForwardDiff
+
+! > *****************************************************************
+! > subroutine ForwardDiffCoef(iorder, coef)
+! > *****************************************************************
+! > Computes the coefficients for the forward difference formula to
+! > approximate the n-th order derivative.
+! > y'(x) = (1/h) * sum_{j=0}^{n} coef(j) * y(x + j*h)
+! > *****************************************************************
+! > Inputs:
+! >   iorder - order of the derivative
+! > Outputs:
+! >   coef(iorder+1) - array of computed coefficients
+! > *****************************************************************
+subroutine ForwardDiffCoef(iorder, coef)
+  implicit none
+  ! ...Input params...
+  integer, intent(in) :: iorder
+  ! ...Output params...
+  real*8, intent(out) :: coef(iorder+1)
+  ! ...Local variables...
+  integer :: p, k
+  real*8, external :: Binom
+  ! ...Execution...
+  coef = 0D0
+  ! Initialize coefficients for iorder = 1, y'(x) = (y(x+h) - y(x)) / h
+  coef(1) = -1.0D0 
+  coef(2) = 1.0D0
+  if(iorder .EQ. 1) return
+  ! Compute coefficients for higher order derivatives
+  do p = 2, iorder
+    do k = 1, p + 1
+        coef(k) = coef(k) + (-1D0)**dble(k)/dble(p) * Binom(p, k-1)
+    end do
+  end do
+end subroutine ForwardDiffCoef
+```
+{: file="ForwardDiff.f90"}
+
+这里仍采用对于给定多项数函数$$y=e^{x}$$，我们计算到函数在$x_{0}=0$处的1阶微分（步长$h=0.01$）到4阶精度：
+
+|  $x_{0}=0$  | 准确值 | 估算值 | 差值绝对值 |
+|:--------:|:--------:|:--------:|:--------:|
+| $y$       | 1 |  |  |
+| $y'(1st)$ | 1 | 1.0050167084167896  | 5.0167084167895837E-003 |
+| $y'(2nd)$ | 1 | 0.99996641549579124 | 3.3584504208761246E-005 |
+| $y'(3rd)$ | 1 | 1.0000002530209215  | 2.5302092154788625E-007 |
+| $y'(4th)$ | 1 | 0.99999999796639116 | 2.0336088368821947E-009 |
+
+对于中间差分，对于系数$c(k)$，由于标准形式的中间差分系数（依赖密集整点格式）需要通过求解方程组得到，这里采用Fornberg递推关系得到一阶导数的标准中间差分公式系数：
+$$\begin{equation}
+\begin{aligned}
+  &c(k) = \frac{(-1)^{k+1}(m!)^2}{k(m-k)!(m+k)!}, \quad k = -m,\cdots,m \\
+  &c(0) = 0
+\end{aligned}
+\end{equation}$$
+
+从这个形式中，总点数$n=2m+1$是中间节点加两边各$m$个节点，得到的一阶导数阶数本质上看仍是$n$阶（符合多项式插值思想）。但实质上由于系数对称性，中间节点系数始终为0，且添加点对称为偶数，所以每多添加一对点，标准中间差分公式的精度阶数仍呈偶数阶次上升（泰勒级数角度看奇偶相加也是如此）。因此在设置标准中间差分精度阶数时一定要设置为**偶数**。
+
+```
+! > *****************************************************************
+! > subroutine CentralDiff(iorder, h, f_xh, x, df)
+! > *****************************************************************
+! > Computes the numerical derivative of a function using central differences.
+! > Inputs:
+! >   iorder - order of the derivative
+! >   h      - step size for finite difference
+! >   f_xh(iorder+1) - function values at x + j*h for j = 0 to iorder
+! >   x      - point at which to evaluate the derivative
+! > Outputs:
+! >   df     - computed derivative value
+! > *****************************************************************
+subroutine CentralDiff(iorder, h, f_xh, x, df)
+  implicit none
+  ! ...Input params...
+  integer, intent(in) :: iorder
+  real*8, intent(in) :: h
+  real*8, intent(in) :: x, f_xh(iorder+1)
+  ! ...Output params...
+  real*8, intent(out) :: df
+  ! ...Local variables...
+  integer :: j
+  real*8 :: coef(iorder+1)
+  ! ...Execution...
+  ! Compute CentralDiffCoeficients
+  call CentralDiffCoef(iorder, coef)
+  ! Compute the iorder-th derivative using central difference formula
+  df = 0.D0
+  do j = 1, iorder + 1
+    df = df + coef(j) * f_xh(j) / h
+  end do
+end subroutine CentralDiff
+
+! > *****************************************************************
+! > subroutine CentralDiffCoef(iorder, coef)
+! > *****************************************************************
+! > Computes the coefficients for the forward difference formula to
+! > approximate the n-th order derivative.
+! > y'(x) = (1/h) * sum_{j=-m}^{m} coef(j) * y(x + j*h)
+! > *****************************************************************
+! > Inputs:
+! >   iorder - order of the derivative
+! > Outputs:
+! >   coef(iorder+1) - array of computed coefficients
+! > *****************************************************************
+subroutine CentralDiffCoef(iorder, coef)
+  implicit none
+  ! ...Input params...
+  integer, intent(in) :: iorder
+  ! ...Output params...
+  real*8, intent(out) :: coef(iorder+1)
+  ! ...Local variables...
+  integer :: p, k, m
+  real*8, external :: Binom, Factorial
+  ! ...Execution...
+  ! Initialization
+  coef = 0D0
+  m = iorder / 2
+  ! Compute coefficients for higher order derivatives
+  do k = -m, m 
+    if(k.EQ.0) cycle
+    coef(k+m+1) = (-1)**(k+1) * Factorial(m)**2D0 / (Factorial(m + k) * Factorial(m - k) * dble(k))
+  end do
+end subroutine CentralDiffCoef
+```
+{: file="CentralDiff.f90"}
+
+这里仍采用对于给定多项数函数$$y=e^{x}$$，我们计算到函数在$x_{0}=0$处的1阶微分（步长$h=0.01$）到8阶精度（2，4，6，8）：
+
+|  $x_{0}=0$  | 准确值 | 估算值 | 差值绝对值 |
+|:--------:|:--------:|:--------:|:--------:|
+| $y$       | 1 |  |  |
+| $y'(2st)$ | 1 | 1.0000166667499926  | 1.6666749992566565E-005 |
+| $y'(4nd)$ | 1 | 0.99999999966663644 | 3.3336355897972680E-010 |
+| $y'(6rd)$ | 1 | 0.99999999999999845 | 1.5543122344752192E-015 |
+| $y'(8th)$ | 1 | 0.99999999999999190 | 8.1046280797636427E-015 |
+
+可以看到，中间差分求解一阶导数的高精度形式收敛速度非常快。
+
+
+> 这里对于数值微分有几个注意点
+> 1. **精度选择**：点数越多，精度越高，但边界需要更多处理
+> 2. **步长影响**：$h$太小会放大舍入误差，太大会增大截断误差
+> 3. **边界处理**：中心差分在边界需改用前向或后向差分
+> 4. **稳定性**：高阶导数计算对噪声敏感，需要平滑处理
+{:.prompt-warning}
+  
+- #### **Richardson外推方法计算数值微分**
+
+Richardson外推方法舍弃了固定等间隔信息点直接构造高阶渐进展式的思路，转用低阶展示不同步长序列的线性组合来消除低阶展式的误差主项，从而提高近似解精度。这里我们采用给定多项数函数$$y=e^{x}$$，利用二阶标准中间差分形式计算其一阶导数，并且利用不同个数的步长序列进行高阶逼近：
+```
+! > *****************************************************************
+! > subroutine RichardsonCentralDiff(istage, hs, f_xh, df)
+! > *****************************************************************
+! > Computes the numerical derivative of a function using central differences
+! > with Richardson extrapolation to improve the accuracy.
+! > Inputs:
+! >   istage - number of Richardson stages
+! >   hs(istage)   - array of step sizes for richardson extrapolation
+! >   f_xh(istage) - array of values corresponding to each step size
+! > Outputs:
+! >   df     - computed derivative value
+! > *****************************************************************
+subroutine RichardsonCentralDiff(istage, hs, f_xh, df)
+  implicit none
+  ! ...Input params...
+  integer, intent(in) :: istage
+  real*8, intent(in) :: hs(istage)
+  real*8, intent(in) :: f_xh(istage)
+  ! ...Output params...
+  real*8, intent(out) :: df
+  ! ...Local variables...
+  integer :: i, j
+  real*8 :: R(istage)
+  ! ...Execution...
+  ! Initialize R array with function values
+  do i = 1, istage 
+    R(i) = f_xh(i)
+  enddo
+  ! Richardson Extrapolation
+  do j = 1, istage - 1
+    do i = 1, istage - j
+      R(i) = R(i+1) + (R(i+1) - R(i)) / ((hs(i)/hs(i+j))**2D0 - 1.D0)
+    end do
+  end do
+  df = R(1)
+end subroutine RichardsonCentralDiff
+```
+{: file="RichardsonCentralDiff.f90"}
+
+可以看到我们采用R(istage)进行递推，并且R中每两项之间的差均为不同阶数求解的误差。对于给定多项数函数$$y=e^{x}$$，我们计算到函数在$x_{0}=0$处的1阶微分（步长$h=0.5$）到8阶精度（2，4，6，8对应展式主项$\mathcal{O}^{2p}$，这里p是代码中的istage，即步长序列的个数）：
+
+|  $x_{0}=0$  | 准确值 | 估算值 | 差值绝对值 |
+|:--------:|:--------:|:--------:|:--------:|
+| $y$       | 1 |  |  |
+| $y'(2st)$ | 1 | 1.0421906109874948  | 4.2190610987494770E-002 |
+| $y'(4nd)$ | 1 | 0.99986881931439908 | 1.3118068560091789E-004 |
+| $y'(6rd)$ | 1 | 1.0000000486618918  | 4.8661891849377525E-008 |
+| $y'(8th)$ | 1 | 0.99999999999736255 | 2.6374458172995219E-012 |
+
+尽管微分求解的基本单元是二阶标准中间差分方法，在利用四个步长的基础上仍然可以很快收敛到精确解。
+
+### **定积分问题**
+<div class="content-box">
+</div>
+
 
 <link rel="stylesheet" href="{{ '/assets/css/mystyle.css' | relative_url }}">
