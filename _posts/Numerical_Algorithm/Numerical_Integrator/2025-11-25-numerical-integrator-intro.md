@@ -59,6 +59,7 @@ $$\begin{equation}
 | 梯形法则  | ❌ | ✅ | 1[^note2] | ✅[^note1] | 1 |
 | 隐式中点法 | ✅ | ✅ | 1[^note2] | ✅[^note1] | 1 |
 | Runge-Kutta[p] | ❌ | ❌ | $\geq p$ | ✅[^note1] | 1 |
+| Runge-Kutta-Nystrom[p] | ❌ | ❌ | $\geq p$ | ✅[^note1] | 2 |
 | Runge-Kutta-Felberg[p/p+1] | ❌ | ❌ | $\ge p$ | ✅ | 1 |
 | **经典多步法积分器** |
 | Adams-Bashforth[p]| ❌ | ❌ | 1 | ❌ | 1 |
